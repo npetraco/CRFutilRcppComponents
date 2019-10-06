@@ -104,6 +104,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// symbolic_conditional_energy
+arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_default);
+RcppExport SEXP _CRFutilRcppComponents_symbolic_conditional_energy(SEXP configSEXP, SEXP condition_element_numberSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP num_params_defaultSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type config(configSEXP);
+    Rcpp::traits::input_parameter< int >::type condition_element_number(condition_element_numberSEXP);
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type edge_mat(edge_matSEXP);
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par(node_parSEXP);
+    Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
+    Rcpp::traits::input_parameter< int >::type num_params_default(num_params_defaultSEXP);
+    rcpp_result_gen = Rcpp::wrap(symbolic_conditional_energy(config, condition_element_number, edge_mat, node_par, edge_par, num_params_default));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CRFutilRcppComponents_ff_C", (DL_FUNC) &_CRFutilRcppComponents_ff_C, 1},
@@ -113,6 +129,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CRFutilRcppComponents_compute_model_matrix", (DL_FUNC) &_CRFutilRcppComponents_compute_model_matrix, 5},
     {"_CRFutilRcppComponents_get_par_off", (DL_FUNC) &_CRFutilRcppComponents_get_par_off, 7},
     {"_CRFutilRcppComponents_phi_component", (DL_FUNC) &_CRFutilRcppComponents_phi_component, 6},
+    {"_CRFutilRcppComponents_symbolic_conditional_energy", (DL_FUNC) &_CRFutilRcppComponents_symbolic_conditional_energy, 6},
     {NULL, NULL, 0}
 };
 

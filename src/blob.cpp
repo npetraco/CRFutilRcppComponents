@@ -185,7 +185,7 @@ arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_
     
     num_params = node_par.max();
     int amax       = 0;
-    for(int i=0; i<edge_par.size(); ++i) {
+    for(int i=0; i<edge_par.size(); ++i) {      // ********* RcppParallel HERE???????
       amax = as<arma::Mat<int>>( edge_par(i) ).max(); // a copy performed with this as<>() ????
       if(amax > num_params){
         num_params = amax;
@@ -309,7 +309,7 @@ int get_par_off(arma::Mat<int>                config,
 
 
 //===============================================
-// phi.component port  **** R nullibles
+// phi.component port  **** R nullables
 //===============================================
 // [[Rcpp::export]]
 int phi_component(arma::Mat<int>                config,
@@ -333,4 +333,49 @@ int phi_component(arma::Mat<int>                config,
   return comp;
   
 }
+
+
+//=====================================================
+// energy_util.R function ports:
+//=====================================================
+//
+//
+//===============================================
+// symbolic.conditional.energy port to C
+//symbolic.conditional.energy(config, condition.element.number, crf, ff, format="tex", printQ=FALSE)
+//===============================================
+//[[Rcpp::export]]
+arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_default=0) {
+  
+  // Same as for phi_features_C:
+  // The original R function determines this everytime it is called. This is stupid and will
+  // slow things down. To keep parity with the R function signature, by default the number of
+  // parameters will be calculated. However the user can also prespcify it and change the default
+  // value from 0 so the loop below isn't excecuted over an over when calling the function
+  // multiple times.
+  int num_params;
+  if(num_params_default == 0) {
+    
+    num_params = node_par.max();
+    int amax       = 0;
+    for(int i=0; i<edge_par.size(); ++i) {
+      amax = as<arma::Mat<int>>( edge_par(i) ).max(); // a copy performed with this as<>() ????
+      if(amax > num_params){
+        num_params = amax;
+      } else {
+        //num_params = num_params_default;
+        stop("num_pars specification broken...");
+      }
+    }
+    
+  } 
+  
+  // Initialize a out_eq (row) vector. Choose row vector. 
+  arma::Mat<int> out_eq(1,num_params);
+  out_eq.zeros();
+  
+
+  return out_eq;
+}
+
 
