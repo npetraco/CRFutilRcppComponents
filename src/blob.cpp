@@ -345,8 +345,8 @@ int phi_component(arma::Mat<int>                config,
 //symbolic.conditional.energy(config, condition.element.number, crf, ff, format="tex", printQ=FALSE)
 //===============================================
 //[[Rcpp::export]]
-arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_default=0) {
-  
+arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_default=0) {
+
   // Same as for phi_features_C:
   // The original R function determines this everytime it is called. This is stupid and will
   // slow things down. To keep parity with the R function signature, by default the number of
@@ -354,6 +354,7 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
   // value from 0 so the loop below isn't excecuted over an over when calling the function
   // multiple times.
   int num_params;
+  
   if(num_params_default == 0) {
     
     num_params = node_par.max();
@@ -374,6 +375,18 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
   arma::Mat<int> out_eq(1,num_params);
   out_eq.zeros();
   
+  IntegerVector adj_nodes_loc = (IntegerVector)adj_nodes(condition_element_number-1); // -1 for offset conversion
+  IntegerVector edge_nods(2);
+  
+  for(int i=0; i<adj_nodes_loc.size(); ++i) {
+
+    edge_nods(0) = condition_element_number;
+    edge_nods(1) = adj_nodes_loc(i);
+    std::sort(edge_nods.begin(), edge_nods.end());
+    //Rcout << edge_nods << endl;
+    
+
+  }
 
   return out_eq;
 }

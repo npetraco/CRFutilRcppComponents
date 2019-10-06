@@ -50,10 +50,21 @@ symbolic.conditional.energy(config                   = as.matrix(configs[jridx,]
                             crf                      = tesf,
                             ff                       = f0,
                             format                   = "conditional.phi",
-                            printQ                   = F)
+                            printQ                   = T)
 # C version:
+tesf$adj.nodes
 symbolic_conditional_energy(config                   = as.matrix(configs[jridx,]), 
-                              condition_element_number = 1, 
-                              node_par                 = theta.pars$node_par, 
-                              edge_par                 = theta.pars$edge_par, 
-                              edge_mat                 = rmod$edges)
+                            condition_element_number = 2, 
+                            node_par                 = theta.pars$node_par, 
+                            edge_par                 = theta.pars$edge_par, 
+                            edge_mat                 = rmod$edges,
+                            adj_nodes                = rmod$adj.nodes
+                            )
+as.matrix(configs[jridx,])
+configs[jridx,]
+t(as.matrix(configs[jridx,]))
+class(tesf$node_par)
+tesf$node.par
+theta.pars
+rmod$adj.nodes[[1]]
+rmod$adj.nodes
