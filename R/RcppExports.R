@@ -25,8 +25,16 @@ get_par_off <- function(config, i_in = NULL, j_in = NULL, node_par_in = NULL, ed
     .Call(`_CRFutilRcppComponents_get_par_off`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ)
 }
 
+get_par_off2 <- function(config, i_in = -1L, j_in = -1L, node_par_in, node_par_in, edge_par_in = NULL, edge_mat_in, printQ = FALSE) {
+    .Call(`_CRFutilRcppComponents_get_par_off2`, config, i_in, j_in, node_par_in, node_par_in, edge_par_in, edge_mat_in, printQ)
+}
+
 phi_component <- function(config, i_in = NULL, j_in = NULL, node_par_in = NULL, edge_par_in = NULL, edge_mat_in = NULL) {
     .Call(`_CRFutilRcppComponents_phi_component`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in)
+}
+
+phi_component2 <- function(config, i_in = -1L, j_in = -1L, node_par_in, edge_par_in = NULL, edge_mat_in) {
+    .Call(`_CRFutilRcppComponents_phi_component2`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in)
 }
 
 symbolic_conditional_energy <- function(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default = 0L) {

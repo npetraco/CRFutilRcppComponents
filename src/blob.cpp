@@ -309,6 +309,107 @@ int get_par_off(arma::Mat<int>                config,
 
 
 //===============================================
+// get.par.idx port Now an offset AND ALMOST NO MORE R-Nullables
+//===============================================
+// [[Rcpp::export]]
+int get_par_off2(arma::Mat<int> config, 
+                int             i_in        = -1, 
+                int             j_in        = -1, 
+                arma::Mat<int>  node_par_in = arma::Mat<int>(0,0),
+                //arma::Mat const & node_par_in = arma::Mat(),
+                Rcpp::Nullable<List> edge_par_in = R_NilValue,
+                arma::Mat<int>  edge_mat_in = arma::Mat<int>(0,0),
+                bool            printQ      = false) {
+  
+  int i, j;
+  List edge_par;
+  arma::Mat<int> edge_mat;
+  arma::Mat<int> node_par;
+  int par_off = -1;          // parameter offset NOT index
+  
+  if(i_in != -1) {
+    i = i_in;
+    if(j_in != -1) {
+      
+      // An edge was input
+      j = j_in;
+      
+      // Need edge_par
+      if(edge_par_in.isNotNull()) {
+        edge_par = edge_par_in;
+        // for(int i=0; i<edge_par.size(); ++i){
+        //   Rcout << as<arma::Mat<int>>(edge_par(i)) << endl;
+        // }
+      } else {
+        stop("Edge param queried but no edge par input.");
+      }
+      
+      // Need edge mat
+      if(edge_mat_in.size() != 0) {
+        edge_mat = edge_mat_in;
+        //Rcout << edge_mat << endl;
+      } else {
+        stop("Edge param queried but no edge mat input.");
+      }
+      
+      // Check and see if the edge indices are together in the edge matrix
+      // Note: actually get the edge offset, not index
+      arma::Mat<int> avec(1,2);
+      avec(0,0) = i;
+      avec(0,1) = j;
+      
+      // edge offset in the edge matrix:
+      arma::uvec edge_off = row_match(avec, edge_mat);
+      
+      if(edge_off.size() == 0) {
+        Rcout << "Input edge indices: i=" << i  << " j=" << j << endl;
+        stop("Input edge indices not found in edge mat");
+      }
+      if(edge_off.size() > 1) {
+        Rcout << "Input edge indices: i=" << i << " j=" << j << endl;
+        stop("Something is wierd. Mutiple instances of this edge found in edge mat.");
+      }
+      
+      // If all looks ok, compute parameter offset (not index!) associated with edge
+      arma::Mat<int> aepm;
+      aepm = as<arma::Mat<int>>(edge_par(edge_off(0)));
+      int left_off  = edge_mat(edge_off(0),0) - 1;                                    // offset NOT index, do -1
+      int right_off = edge_mat(edge_off(0),1) - 1;                                    // offset NOT index, do -1
+      
+      arma::Mat<int> tmp;                                                             // to hold product
+      tmp = ff_C(config(left_off)).t() * aepm * ff_C(config(right_off));
+      
+      par_off = tmp(0,0) - 1;                                                         // offset NOT index, do -1
+      
+    } else {
+      
+      //A node was input
+      if(node_par_in.size() != 0) {
+        node_par = node_par_in;
+        //Rcout << node_par << endl;
+      } else {
+        stop("Node param queried but no node par input.");
+      }
+      
+      // Need to get node row (offset) out of node par
+      // Note: assumes each node only has one parameter. One parameter can be shared
+      // between many nodes however.
+      
+      // If all looks ok, compute parameter offset (not index!) associated with node
+      int node_off = i-1;                                                  // Just for readability for when I forget how I did this...
+      par_off = dot( node_par.row(node_off), ff_C(config(node_off)) ) - 1; // -1 bec we want offsets NOT indices
+    }
+    
+  } else {
+    stop("No node i index entered!");
+  }
+  
+  // Note: If offset is -1 that means parameter is not associated with this node/edge and spin set
+  return par_off;
+}
+
+
+//===============================================
 // phi.component port  **** R nullables
 //===============================================
 // [[Rcpp::export]]
@@ -320,6 +421,33 @@ int phi_component(arma::Mat<int>                config,
                   Rcpp::Nullable<IntegerMatrix> edge_mat_in = R_NilValue) {
   
   int par_off = get_par_off(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
+  
+  int swtch;
+  if(par_off == -1) {
+    swtch = 1;
+  } else {
+    swtch = 0;
+  }
+  
+  int comp = 1 - swtch;
+  
+  return comp;
+  
+}
+
+
+//===============================================
+// phi.component port  **** NOW WITH ALMOST NO R nullables
+//===============================================
+// [[Rcpp::export]]
+int phi_component2(arma::Mat<int> config,
+                   int i_in                         = -1, 
+                   int j_in                         = -1, 
+                   arma::Mat<int> node_par_in       = arma::Mat<int>(0,0),
+                   Rcpp::Nullable<List> edge_par_in = R_NilValue,
+                   arma::Mat<int> edge_mat_in       = arma::Mat<int>(0,0)) {
+  
+  int par_off = get_par_off2(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
   
   int swtch;
   if(par_off == -1) {
@@ -375,6 +503,13 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
   arma::Mat<int> out_eq(1,num_params);
   out_eq.zeros();
   
+  //l     <- get.par.idx(config = config, i=condition.element.number, node.par=crf$node.par, ff=ff)
+  //IntegerMatrix node_par_loc = as<IntegerMatrix>(node_par);
+  //int l = get_par_off(config, condition_element_number, R_NilValue, node_par, R_NilValue, R_NilValue, false);
+  
+  //phi.l <- phi.component(config = config, i=condition.element.number, node.par=crf$node.par, ff=ff)
+    
+  
   IntegerVector adj_nodes_loc = (IntegerVector)adj_nodes(condition_element_number-1); // -1 for offset conversion
   IntegerVector edge_nods(2);
   
@@ -383,8 +518,6 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
     edge_nods(0) = condition_element_number;
     edge_nods(1) = adj_nodes_loc(i);
     std::sort(edge_nods.begin(), edge_nods.end());
-    //Rcout << edge_nods << endl;
-    
 
   }
 

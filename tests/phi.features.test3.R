@@ -46,6 +46,7 @@ rmod$edges
 as.matrix(configs[jridx,])
 
 get_par_off(as.matrix(configs[jridx,]), i_in = 17, node_par_in = theta.pars$node_par) # This should not work
+
 get_par_off(as.matrix(configs[jridx,]), 
             i_in = 14,
             j_in = 15,

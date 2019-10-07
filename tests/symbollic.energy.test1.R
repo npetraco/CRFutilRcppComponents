@@ -4,7 +4,7 @@ library(rbenchmark)
 library(microbenchmark)
 
 # Make up a random graph
-g <- erdos.renyi.game(5, 1, typ="gnp")
+g <- erdos.renyi.game(6, 1, typ="gnp")
 dev.off()
 plot(g)
 
@@ -36,10 +36,12 @@ configs <- configs.and.counts[,1:ncol(samps)]
 configs <- as.matrix(sapply(configs, as.numeric))
 head(configs)
 
+# Here we remove the extra index put in by CRF using the C function
 theta.pars   <- fix_node_and_edge_par(node_par = rmod$node.par, edge_par = rmod$edge.par)
 
 # Tests:
 tesf <- make.empty.field(adj.mat = adj, parameterization.typ = "standard", plotQ = F)
+tesf$par
 
 #jridx <- 1
 jridx <- sample(1:nrow(configs), size = 1)
