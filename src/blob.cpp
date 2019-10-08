@@ -309,17 +309,22 @@ int get_par_off(arma::Mat<int>                config,
 
 
 //===============================================
-// get.par.idx port Now an offset AND ALMOST NO MORE R-Nullables
+// get.par.idx port Now an offset AND ALMOST NO 
+// MORE R-Nullables
+// We can't do default arma arguements since they
+// are not supported in Rcpp
+// So instead pass in an array object that can be
+// cast to an arma Mat and has a -1 (0,0) 
+// element
 //===============================================
 // [[Rcpp::export]]
-int get_par_off2(arma::Mat<int> config, 
-                int             i_in        = -1, 
-                int             j_in        = -1, 
-                arma::Mat<int>  node_par_in = arma::Mat<int>(0,0),
-                //arma::Mat const & node_par_in = arma::Mat(),
-                Rcpp::Nullable<List> edge_par_in = R_NilValue,
-                arma::Mat<int>  edge_mat_in = arma::Mat<int>(0,0),
-                bool            printQ      = false) {
+int get_par_off2(arma::Mat<int>       config, 
+                 int                  i_in,  
+                 int                  j_in, 
+                 arma::Mat<int>       node_par_in,
+                 arma::Mat<int>       edge_mat_in,
+                 Rcpp::Nullable<List> edge_par_in = R_NilValue,
+                 bool            printQ      = false) {
   
   int i, j;
   List edge_par;
@@ -345,7 +350,7 @@ int get_par_off2(arma::Mat<int> config,
       }
       
       // Need edge mat
-      if(edge_mat_in.size() != 0) {
+      if(edge_mat_in(0,0) != -1) {
         edge_mat = edge_mat_in;
         //Rcout << edge_mat << endl;
       } else {
@@ -384,7 +389,7 @@ int get_par_off2(arma::Mat<int> config,
     } else {
       
       //A node was input
-      if(node_par_in.size() != 0) {
+      if(node_par_in(0,0) != -1) { //Indicate empty node_par_in by passing in -1 0,0 element 
         node_par = node_par_in;
         //Rcout << node_par << endl;
       } else {
@@ -447,7 +452,7 @@ int phi_component2(arma::Mat<int> config,
                    Rcpp::Nullable<List> edge_par_in = R_NilValue,
                    arma::Mat<int> edge_mat_in       = arma::Mat<int>(0,0)) {
   
-  int par_off = get_par_off2(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
+  int par_off = get_par_off2(config, i_in, j_in, node_par_in, edge_mat_in, edge_par_in);
   
   int swtch;
   if(par_off == -1) {
