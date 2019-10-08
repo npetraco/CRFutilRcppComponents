@@ -89,8 +89,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_par_off2
-int get_par_off2(arma::Mat<int> config, int i_in, int j_in, arma::Mat<int> node_par_in, arma::Mat<int> edge_mat_in, Rcpp::Nullable<List> edge_par_in, bool printQ);
-RcppExport SEXP _CRFutilRcppComponents_get_par_off2(SEXP configSEXP, SEXP i_inSEXP, SEXP j_inSEXP, SEXP node_par_inSEXP, SEXP edge_mat_inSEXP, SEXP edge_par_inSEXP, SEXP printQSEXP) {
+int get_par_off2(arma::Mat<int> config, int i_in, int j_in, arma::Mat<int> node_par_in, Rcpp::Nullable<List> edge_par_in, arma::Mat<int> edge_mat_in, bool printQ);
+RcppExport SEXP _CRFutilRcppComponents_get_par_off2(SEXP configSEXP, SEXP i_inSEXP, SEXP j_inSEXP, SEXP node_par_inSEXP, SEXP edge_par_inSEXP, SEXP edge_mat_inSEXP, SEXP printQSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -98,10 +98,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type i_in(i_inSEXP);
     Rcpp::traits::input_parameter< int >::type j_in(j_inSEXP);
     Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par_in(node_par_inSEXP);
-    Rcpp::traits::input_parameter< arma::Mat<int> >::type edge_mat_in(edge_mat_inSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<List> >::type edge_par_in(edge_par_inSEXP);
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type edge_mat_in(edge_mat_inSEXP);
     Rcpp::traits::input_parameter< bool >::type printQ(printQSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_par_off2(config, i_in, j_in, node_par_in, edge_mat_in, edge_par_in, printQ));
+    rcpp_result_gen = Rcpp::wrap(get_par_off2(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ));
     return rcpp_result_gen;
 END_RCPP
 }

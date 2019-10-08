@@ -310,7 +310,7 @@ int get_par_off(arma::Mat<int>                config,
 
 //===============================================
 // get.par.idx port Now an offset AND ALMOST NO 
-// MORE R-Nullables
+// MORE R-Nullables and almost NO DEFAULT ARGUEMENTS
 // We can't do default arma arguements since they
 // are not supported in Rcpp
 // So instead pass in an array object that can be
@@ -322,9 +322,9 @@ int get_par_off2(arma::Mat<int>       config,
                  int                  i_in,  
                  int                  j_in, 
                  arma::Mat<int>       node_par_in,
+                 Rcpp::Nullable<List> edge_par_in,
                  arma::Mat<int>       edge_mat_in,
-                 Rcpp::Nullable<List> edge_par_in = R_NilValue,
-                 bool            printQ      = false) {
+                 bool                 printQ = false) {
   
   int i, j;
   List edge_par;
@@ -350,7 +350,7 @@ int get_par_off2(arma::Mat<int>       config,
       }
       
       // Need edge mat
-      if(edge_mat_in(0,0) != -1) {
+      if(edge_mat_in(0,0) != -1) { // -1 means empty arguement
         edge_mat = edge_mat_in;
         //Rcout << edge_mat << endl;
       } else {
@@ -442,17 +442,17 @@ int phi_component(arma::Mat<int>                config,
 
 
 //===============================================
-// phi.component port  **** NOW WITH ALMOST NO R nullables
+// phi.component port  **** NOW WITH ALMOST NO R nullables and NO DEFAULT ARGUEMENTS
 //===============================================
 // [[Rcpp::export]]
-int phi_component2(arma::Mat<int> config,
-                   int i_in                         = -1, 
-                   int j_in                         = -1, 
-                   arma::Mat<int> node_par_in       = arma::Mat<int>(0,0),
-                   Rcpp::Nullable<List> edge_par_in = R_NilValue,
-                   arma::Mat<int> edge_mat_in       = arma::Mat<int>(0,0)) {
+int phi_component2(arma::Mat<int>       config,
+                   int                  i_in, 
+                   int                  j_in, 
+                   arma::Mat<int>       node_par_in,
+                   Rcpp::Nullable<List> edge_par_in,
+                   arma::Mat<int>       edge_mat_in) {
   
-  int par_off = get_par_off2(config, i_in, j_in, node_par_in, edge_mat_in, edge_par_in);
+  int par_off = get_par_off2(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
   
   int swtch;
   if(par_off == -1) {
@@ -491,7 +491,7 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
   if(num_params_default == 0) {
     
     num_params = node_par.max();
-    int amax       = 0;
+    int amax   = 0;
     for(int i=0; i<edge_par.size(); ++i) {
       amax = as<arma::Mat<int>>( edge_par(i) ).max(); // a copy performed with this as<>() ????
       if(amax > num_params){
@@ -508,12 +508,17 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
   arma::Mat<int> out_eq(1,num_params);
   out_eq.zeros();
   
-  //l     <- get.par.idx(config = config, i=condition.element.number, node.par=crf$node.par, ff=ff)
-  //IntegerMatrix node_par_loc = as<IntegerMatrix>(node_par);
-  //int l = get_par_off(config, condition_element_number, R_NilValue, node_par, R_NilValue, R_NilValue, false);
+  // To indicate an empty arma matrix arguement: IS THERE A BETTER WAY????  
+  arma::Mat<int> emptym(1,1);
+  emptym(0,0) = -1;
   
-  //phi.l <- phi.component(config = config, i=condition.element.number, node.par=crf$node.par, ff=ff)
-    
+  // param.num.vec length is num_param? increment elements? OR just keep appending like in R code?
+  
+  // Parameter (if any) associated with conditioned node
+  int l     = get_par_off2(config, condition_element_number, -1, node_par, R_NilValue, emptym, false);
+  int phi_l = phi_component2(config, condition_element_number, -1, node_par, R_NilValue, emptym);
+
+  Rcout << "For node i: " << condition_element_number << " in state Xi=" << config(condition_element_number) << ", param# assoc l=" << l << " and thus phi_l=" << phi_l << endl;
   
   IntegerVector adj_nodes_loc = (IntegerVector)adj_nodes(condition_element_number-1); // -1 for offset conversion
   IntegerVector edge_nods(2);

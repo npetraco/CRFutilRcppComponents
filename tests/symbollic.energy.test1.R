@@ -62,6 +62,9 @@ symbolic_conditional_energy(config                   = as.matrix(configs[jridx,]
                             edge_mat                 = rmod$edges,
                             adj_nodes                = rmod$adj.nodes
                             )
+
+rmod$par
+
 as.matrix(configs[jridx,])
 configs[jridx,]
 t(as.matrix(configs[jridx,]))
