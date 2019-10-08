@@ -36,6 +36,8 @@ configs <- configs.and.counts[,1:ncol(samps)]
 configs <- as.matrix(sapply(configs, as.numeric))
 head(configs)
 
+plot(1:nrow(configs.and.counts),configs.and.counts[,ncol(configs.and.counts)],typ="h", ylab="config freqs",xlab="config #")
+
 # Here we remove the extra index put in by CRF using the C function
 theta.pars   <- fix_node_and_edge_par(node_par = rmod$node.par, edge_par = rmod$edge.par)
 
@@ -49,14 +51,15 @@ jridx <- sample(1:nrow(configs), size = 1)
 # R version:
 symbolic.conditional.energy(config                   = as.matrix(configs[jridx,]), 
                             condition.element.number = 1, 
-                            crf                      = tesf,
+                            #crf                      = tesf,
+                            crf                      = rmod,
                             ff                       = f0,
                             format                   = "conditional.phi",
                             printQ                   = T)
 # C version:
 tesf$adj.nodes
 symbolic_conditional_energy(config                   = as.matrix(configs[jridx,]), 
-                            condition_element_number = 2, 
+                            condition_element_number = 5, 
                             node_par                 = theta.pars$node_par, 
                             edge_par                 = theta.pars$edge_par, 
                             edge_mat                 = rmod$edges,
@@ -64,6 +67,7 @@ symbolic_conditional_energy(config                   = as.matrix(configs[jridx,]
                             )
 
 rmod$par
+rmod$edges
 
 as.matrix(configs[jridx,])
 configs[jridx,]

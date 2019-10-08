@@ -502,24 +502,39 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
       }
     }
     
+    Rcout << "Number of parameters is: " << num_params << endl;
+    
   } 
   
   // Initialize a out_eq (row) vector. Choose row vector. 
-  arma::Mat<int> out_eq(1,num_params);
-  out_eq.zeros();
+  //arma::Mat<int> out_eq(1,num_params);
+  //out_eq.zeros();
   
   // To indicate an empty arma matrix arguement: IS THERE A BETTER WAY????  
   arma::Mat<int> emptym(1,1);
   emptym(0,0) = -1;
   
-  // param.num.vec length is num_param? increment elements? OR just keep appending like in R code?
+  // Initialize an alpha vector (param.num.vec). Choose row vector.
+  // This implementation is a little different than the in the R code. There param.num.vec acumulated by appending
+  // Here we will allocate the full length of the vector instead and increment the elements as needed.
+  // Note: an alpha vector contains the number of times each theta_k appears in E(X_i|X/X_i)(amon other things)
+  arma::Mat<int> param_num_vec(1,num_params);
+  param_num_vec.zeros();
   
   // Parameter (if any) associated with conditioned node
-  int l     = get_par_off2(config, condition_element_number, -1, node_par, R_NilValue, emptym, false);
-  int phi_l = phi_component2(config, condition_element_number, -1, node_par, R_NilValue, emptym);
-
-  Rcout << "For node i: " << condition_element_number << " in state Xi=" << config(condition_element_number) << ", param# assoc l=" << l << " and thus phi_l=" << phi_l << endl;
+  int l = get_par_off2(config, condition_element_number, -1, node_par, R_NilValue, emptym, false);
+  if(l > 0) {
+    param_num_vec(l) ++;
+  }
   
+  // Below needed *******??
+  int phi_l = phi_component2(config, condition_element_number, -1, node_par, R_NilValue, emptym);
+  
+  Rcout << "For node i: " << condition_element_number << " in state Xi=" << config(condition_element_number) << ", param# assoc l=" << l+1 << " and thus phi_l=" << phi_l << endl;
+  
+  // MAKE adj_nodes NULLABLE LATER *********
+  // adj_nodes is pased in as a List. Didn't bother to make nullable because we wouldn't use this function 
+  // if a node in the model has no attached neoghbors.
   IntegerVector adj_nodes_loc = (IntegerVector)adj_nodes(condition_element_number-1); // -1 for offset conversion
   IntegerVector edge_nods(2);
   
@@ -528,10 +543,18 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
     edge_nods(0) = condition_element_number;
     edge_nods(1) = adj_nodes_loc(i);
     std::sort(edge_nods.begin(), edge_nods.end());
-
+    
+    //Rcout << "got here" << endl;
+    
+    int k     = get_par_off2(config, edge_nods(0), edge_nods(1), emptym, edge_par, edge_mat, false);
+    if(k > 0) {
+      param_num_vec(k) ++;
+    }
+    Rcout << "Node:" << condition_element_number << " Adjacent Edge i=" << i+1 << " " << edge_nods(0) << "--" << edge_nods(1) << " theta_k#: " << k+1 << endl;
+    
   }
 
-  return out_eq;
+  return param_num_vec;
 }
 
 
