@@ -28,8 +28,7 @@ arma::Mat<int> ff_C(int x){
 // CRF default node_par and edge_par are 3D "Cubes" with 1 slice (3 index R arrays).
 // This function makes them armadillo integer matrices (2D) to head of annoying type 
 // conflicts and code bloat from re-use. For now, we export to R as well for testing.
-// Ultimately intended for internal use.
-// Armadillo version
+// Ultimately intended for internal use only.
 //===================================================================================
 // [[Rcpp::export]]
 List fix_node_and_edge_par(arma::Cube<int> node_par, List edge_par){
@@ -54,6 +53,7 @@ List fix_node_and_edge_par(arma::Cube<int> node_par, List edge_par){
 
   }
 
+  // Node pars and Edge pars with third dimension removed:
   List theta_pars;
   theta_pars["node_par"] = node_par_new;
   theta_pars["edge_par"] = edge_par_new;
@@ -64,7 +64,7 @@ List fix_node_and_edge_par(arma::Cube<int> node_par, List edge_par){
 
 //===============================================
 // row.match in C. Much faster than in R and we
-// don't want to pass in R functions
+// don't want to pass in R functions anyway
 //===============================================
 // [[Rcpp::export]]
 arma::uvec row_match(arma::Mat<int> x, arma::Mat<int> table){
@@ -148,18 +148,18 @@ arma::Mat<int> phi_features_C(arma::Mat<int> config, arma::Mat<int> edge_mat, ar
     
     // Check and see if we reached the end of phi. No point in doing the rest of the edges if we did:
     // NOTE: assumes parameters have unique consecutive indices, so no wierd parameterizations.
-    // Sticking to "standard" or "flexible" should be safe.
+    // Sticking to "standard" or "flexible" should be safe. ****** REMOVE AT SOME POINT!!!!!!!!!!!
     if(phi_off == num_params) {
       break;
     }
     
     aepm = as<arma::Mat<int>>(edge_par(i));
-    int left_off  = edge_mat(i,0) - 1;                                    // offset NOT index, do -1
-    int right_off = edge_mat(i,1) - 1;                                    // offset NOT index, do -1
+    int left_off  = edge_mat(i,0) - 1; // offset NOT index, do -1
+    int right_off = edge_mat(i,1) - 1; // offset NOT index, do -1
     
     arma::Mat<int> tmp = ff_C(config(left_off)).t() * aepm * ff_C(config(right_off));
     
-    phi_off = tmp(0,0) - 1;                                               // offset NOT index, do -1
+    phi_off = tmp(0,0) - 1;            // offset NOT index, do -1
     
     // Kronecker delta part:
     if(phi_off != -1) {
@@ -185,7 +185,7 @@ arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_
     
     num_params = node_par.max();
     int amax       = 0;
-    for(int i=0; i<edge_par.size(); ++i) {      // ********* RcppParallel HERE???????
+    for(int i=0; i<edge_par.size(); ++i) {     
       amax = as<arma::Mat<int>>( edge_par(i) ).max(); // a copy performed with this as<>() ????
       if(amax > num_params){
         num_params = amax;
@@ -199,7 +199,7 @@ arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_
   
   arma::Mat<int> model_mat(num_configs, num_params);
   
-  for(int i=0; i<num_configs; ++i){
+  for(int i=0; i<num_configs; ++i){  // ********* RcppParallel HERE???????
     model_mat.row(i) = phi_features_C(configs.row(i), edge_mat, node_par, edge_par);
   }
   
@@ -210,6 +210,7 @@ arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_
 
 //===============================================
 // get.par.idx port Now an offset however  ******* R-Nullables may be causing PROBLEMS?
+// ******** REMOVE AT SOME POINT
 //===============================================
 // [[Rcpp::export]]
 int get_par_off(arma::Mat<int>                config, 
@@ -311,11 +312,13 @@ int get_par_off(arma::Mat<int>                config,
 //===============================================
 // get.par.idx port Now an offset AND ALMOST NO 
 // MORE R-Nullables and almost NO DEFAULT ARGUEMENTS
-// We can't do default arma arguements since they
+// * We can't do default arma arguements since they
 // are not supported in Rcpp
-// So instead pass in an array object that can be
-// cast to an arma Mat and has a -1 (0,0) 
-// element
+// * So instead pass in an array object that can be
+// cast to an arma Mat and has a -1 as the (0,0) 
+// element.
+// * i_in and j_in are indicated as empty by passing
+// in -1
 //===============================================
 // [[Rcpp::export]]
 int get_par_off2(arma::Mat<int>       config, 
@@ -336,23 +339,19 @@ int get_par_off2(arma::Mat<int>       config,
     i = i_in;
     if(j_in != -1) {
       
-      // An edge was input
+      // A non -1 i_in and j_in passed in indicate and edge was input
       j = j_in;
       
-      // Need edge_par
+      // Need edge_par for an edge
       if(edge_par_in.isNotNull()) {
         edge_par = edge_par_in;
-        // for(int i=0; i<edge_par.size(); ++i){
-        //   Rcout << as<arma::Mat<int>>(edge_par(i)) << endl;
-        // }
       } else {
         stop("Edge param queried but no edge par input.");
       }
       
-      // Need edge mat
-      if(edge_mat_in(0,0) != -1) { // -1 means empty arguement
+      // Need edge mat for an edge
+      if(edge_mat_in(0,0) != -1) { // -1 at (0,0) means empty arguement
         edge_mat = edge_mat_in;
-        //Rcout << edge_mat << endl;
       } else {
         stop("Edge param queried but no edge mat input.");
       }
@@ -367,7 +366,7 @@ int get_par_off2(arma::Mat<int>       config,
       arma::uvec edge_off = row_match(avec, edge_mat);
       
       if(edge_off.size() == 0) {
-        Rcout << "Input edge indices: i=" << i  << " j=" << j << endl;
+        Rcout << "Input edge indices: i=" << i << " j=" << j << endl;
         stop("Input edge indices not found in edge mat");
       }
       if(edge_off.size() > 1) {
@@ -377,21 +376,20 @@ int get_par_off2(arma::Mat<int>       config,
       
       // If all looks ok, compute parameter offset (not index!) associated with edge
       arma::Mat<int> aepm;
-      aepm = as<arma::Mat<int>>(edge_par(edge_off(0)));
-      int left_off  = edge_mat(edge_off(0),0) - 1;                                    // offset NOT index, do -1
-      int right_off = edge_mat(edge_off(0),1) - 1;                                    // offset NOT index, do -1
+      aepm = as<arma::Mat<int>>(edge_par(edge_off(0))); // parameter index matrix for the edge
+      int left_off  = edge_mat(edge_off(0),0) - 1;      // offset NOT index, so do -1
+      int right_off = edge_mat(edge_off(0),1) - 1;      // offset NOT index, so do -1
       
-      arma::Mat<int> tmp;                                                             // to hold product
+      arma::Mat<int> tmp;                               // to hold product
       tmp = ff_C(config(left_off)).t() * aepm * ff_C(config(right_off));
       
-      par_off = tmp(0,0) - 1;                                                         // offset NOT index, do -1
+      par_off = tmp(0,0) - 1;                           // offset NOT index, so do -1
       
     } else {
       
       //A node was input
       if(node_par_in(0,0) != -1) { //Indicate empty node_par_in by passing in -1 0,0 element 
         node_par = node_par_in;
-        //Rcout << node_par << endl;
       } else {
         stop("Node param queried but no node par input.");
       }
@@ -416,6 +414,7 @@ int get_par_off2(arma::Mat<int>       config,
 
 //===============================================
 // phi.component port  **** R nullables
+// ******* Remove this at some point
 //===============================================
 // [[Rcpp::export]]
 int phi_component(arma::Mat<int>                config,
@@ -443,6 +442,7 @@ int phi_component(arma::Mat<int>                config,
 
 //===============================================
 // phi.component port  **** NOW WITH ALMOST NO R nullables and NO DEFAULT ARGUEMENTS
+// See get_par_off2 for what "empty" arguements should be passed in as
 //===============================================
 // [[Rcpp::export]]
 int phi_component2(arma::Mat<int>       config,
@@ -474,11 +474,15 @@ int phi_component2(arma::Mat<int>       config,
 //
 //
 //===============================================
-// symbolic.conditional.energy port to C
-//symbolic.conditional.energy(config, condition.element.number, crf, ff, format="tex", printQ=FALSE)
+// Port of guts (ONLY) of symbolic.conditional.energy
+// We are really just interested in computing the alpha vector in C.
+// Recall an alpha vector is (among other things) the number 
+// of times each parameter appears in the expression for a 
+// conditional energy E(X_i|X/X_i). 
+// The alpha vectors are needed to form the Delta-alpha matrix
 //===============================================
 //[[Rcpp::export]]
-arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_default=0) {
+arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_default=0) {
 
   // Same as for phi_features_C:
   // The original R function determines this everytime it is called. This is stupid and will
@@ -497,20 +501,12 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
       if(amax > num_params){
         num_params = amax;
       } else {
-        //num_params = num_params_default;
         stop("num_pars specification broken...");
       }
     }
-    
-    Rcout << "Number of parameters is: " << num_params << endl;
-    
   } 
   
-  // Initialize a out_eq (row) vector. Choose row vector. 
-  //arma::Mat<int> out_eq(1,num_params);
-  //out_eq.zeros();
-  
-  // To indicate an empty arma matrix arguement: IS THERE A BETTER WAY????  
+  // To indicate an empty arma matrix arguement: ***** IS THERE A BETTER WAY????  
   arma::Mat<int> emptym(1,1);
   emptym(0,0) = -1;
   
@@ -518,23 +514,18 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
   // This implementation is a little different than the in the R code. There param.num.vec acumulated by appending
   // Here we will allocate the full length of the vector instead and increment the elements as needed.
   // Note: an alpha vector contains the number of times each theta_k appears in E(X_i|X/X_i)(amon other things)
-  arma::Mat<int> param_num_vec(1,num_params);
+  arma::Mat<int> param_num_vec(1,num_params); // This will be the alpha vector
   param_num_vec.zeros();
   
   // Parameter (if any) associated with conditioned node
   int l = get_par_off2(config, condition_element_number, -1, node_par, R_NilValue, emptym, false);
-  if(l > 0) {
+  if(l >= 0) {
     param_num_vec(l) ++;
   }
   
-  // Below needed *******??
-  int phi_l = phi_component2(config, condition_element_number, -1, node_par, R_NilValue, emptym);
-  
-  Rcout << "For node i: " << condition_element_number << " in state Xi=" << config(condition_element_number) << ", param# assoc l=" << l+1 << " and thus phi_l=" << phi_l << endl;
-  
-  // MAKE adj_nodes NULLABLE LATER *********
-  // adj_nodes is pased in as a List. Didn't bother to make nullable because we wouldn't use this function 
-  // if a node in the model has no attached neoghbors.
+  // MAKE adj_nodes NULLABLE LATER in case we input a model with unconnected nodes *********
+  // adj_nodes is pased in as a List. Didn't bother to make nullable because we probably wouldn't use this function 
+  // if a node in the model has no attached neighbors.
   IntegerVector adj_nodes_loc = (IntegerVector)adj_nodes(condition_element_number-1); // -1 for offset conversion
   IntegerVector edge_nods(2);
   
@@ -544,17 +535,12 @@ arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_
     edge_nods(1) = adj_nodes_loc(i);
     std::sort(edge_nods.begin(), edge_nods.end());
     
-    //Rcout << "got here" << endl;
-    
-    int k     = get_par_off2(config, edge_nods(0), edge_nods(1), emptym, edge_par, edge_mat, false);
-    if(k > 0) {
+    int k = get_par_off2(config, edge_nods(0), edge_nods(1), emptym, edge_par, edge_mat, false);
+    if(k >= 0) {
       param_num_vec(k) ++;
     }
-    Rcout << "Node:" << condition_element_number << " Adjacent Edge i=" << i+1 << " " << edge_nods(0) << "--" << edge_nods(1) << " theta_k#: " << k+1 << endl;
-    
+
   }
 
   return param_num_vec;
 }
-
-

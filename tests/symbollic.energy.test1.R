@@ -4,7 +4,8 @@ library(rbenchmark)
 library(microbenchmark)
 
 # Make up a random graph
-g <- erdos.renyi.game(6, 1, typ="gnp")
+num.nodes <- 12
+g <- erdos.renyi.game(num.nodes, 1, typ="gnp")
 dev.off()
 plot(g)
 
@@ -45,35 +46,138 @@ theta.pars   <- fix_node_and_edge_par(node_par = rmod$node.par, edge_par = rmod$
 tesf <- make.empty.field(adj.mat = adj, parameterization.typ = "standard", plotQ = F)
 tesf$par
 
-#jridx <- 1
-jridx <- sample(1:nrow(configs), size = 1)
+
+#jridx <- sample(1:nrow(configs), size = 1)
+for(i in 1:nrow(configs)) {
+  jridx <- i
+  
+  for(j in 1:num.nodes) {
+    
+    # R version:
+    ra <- symbolic.conditional.energy(config             = as.matrix(configs[jridx,]), 
+                                      condition.element.number = 1, 
+                                      #crf                      = tesf,
+                                      crf                      = rmod,
+                                      ff                       = f0,
+                                      format                   = "conditional.phi",
+                                      printQ                   = F)
+    # C version:
+    ca<- alpha_vector(config              = as.matrix(configs[jridx,]), 
+                      condition_element_number = 1, 
+                      node_par                 = theta.pars$node_par, 
+                      edge_par                 = theta.pars$edge_par, 
+                      edge_mat                 = rmod$edges,
+                      adj_nodes                = rmod$adj.nodes)
+    #print(paste(jridx, " ", j))
+    if(sum(ra!=ca) != 0 ){
+      stop("Ack, not the same!")
+    }
+  }
+}
+
+
 
 # R version:
-symbolic.conditional.energy(config                   = as.matrix(configs[jridx,]), 
+ra <- symbolic.conditional.energy(config             = as.matrix(configs[jridx,]), 
                             condition.element.number = 1, 
                             #crf                      = tesf,
                             crf                      = rmod,
                             ff                       = f0,
                             format                   = "conditional.phi",
-                            printQ                   = T)
+                            printQ                   = F)
 # C version:
-tesf$adj.nodes
-symbolic_conditional_energy(config                   = as.matrix(configs[jridx,]), 
-                            condition_element_number = 5, 
+ca<- alpha_vector(config              = as.matrix(configs[jridx,]), 
+             condition_element_number = 1, 
+             node_par                 = theta.pars$node_par, 
+             edge_par                 = theta.pars$edge_par, 
+             edge_mat                 = rmod$edges,
+             adj_nodes                = rmod$adj.nodes)
+
+rbind(ra,ca)
+sum(ra!=ca)
+
+# Speed tests
+benchmark(replications = 1000,
+          # C version:
+          ca<- alpha_vector(config              = as.matrix(configs[jridx,]), 
+                            condition_element_number = 1, 
                             node_par                 = theta.pars$node_par, 
                             edge_par                 = theta.pars$edge_par, 
                             edge_mat                 = rmod$edges,
-                            adj_nodes                = rmod$adj.nodes
-                            )
+                            adj_nodes                = rmod$adj.nodes),
+          # R version:
+          ra <- symbolic.conditional.energy(config             = as.matrix(configs[jridx,]), 
+                                            condition.element.number = 1, 
+                                            #crf                      = tesf,
+                                            crf                      = rmod,
+                                            ff                       = f0,
+                                            format                   = "conditional.phi",
+                                            printQ                   = F)
+)
 
-rmod$par
-rmod$edges
+# C
+start_time <- Sys.time()
+for(i in 1:nrow(configs)) {
+  jridx <- i
+  
+  for(j in 1:num.nodes) {
+    # C version:
+    ca<- alpha_vector(config              = as.matrix(configs[jridx,]), 
+                      condition_element_number = 1, 
+                      node_par                 = theta.pars$node_par, 
+                      edge_par                 = theta.pars$edge_par, 
+                      edge_mat                 = rmod$edges,
+                      adj_nodes                = rmod$adj.nodes)
+    #print(paste(jridx, " ", j))
+    if(sum(ra!=ca) != 0 ){
+      stop("Ack, not the same!")
+    }
+  }
+}
+end_time <- Sys.time()
+end_time - start_time
 
-as.matrix(configs[jridx,])
-configs[jridx,]
-t(as.matrix(configs[jridx,]))
-class(tesf$node_par)
-tesf$node.par
-theta.pars
-rmod$adj.nodes[[1]]
-rmod$adj.nodes
+# R
+start_time <- Sys.time()
+for(i in 1:nrow(configs)) {
+  jridx <- i
+  
+  for(j in 1:num.nodes) {
+    # R version:
+    ra <- symbolic.conditional.energy(config             = as.matrix(configs[jridx,]), 
+                                      condition.element.number = 1, 
+                                      #crf                      = tesf,
+                                      crf                      = rmod,
+                                      ff                       = f0,
+                                      format                   = "conditional.phi",
+                                      printQ                   = F)
+    #print(paste(jridx, " ", j))
+    if(sum(ra!=ca) != 0 ){
+      stop("Ack, not the same!")
+    }
+  }
+}
+end_time <- Sys.time()
+end_time - start_time
+
+
+get_par_off2(
+  config      = as.matrix(configs[jridx,]), 
+  i_in        =  1, 
+  j_in        = -1, 
+  node_par_in = theta.pars$node_par, 
+  edge_par_in = NULL, 
+  edge_mat_in = array(-1,c(1,1)), 
+  printQ      = F)
+
+array(-1,c(1,1))
+
+get.par.idx(
+  config   = as.matrix(configs[jridx,]), 
+  i        = 1, 
+  #j        = NULL, 
+  node.par = rmod$node.par, 
+  #edge.par = rmod$edge.par, 
+  #edge.mat = rmod$edges, 
+  ff       = f0, 
+  printQ   = F)

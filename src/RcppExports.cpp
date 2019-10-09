@@ -137,9 +137,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// symbolic_conditional_energy
-arma::Mat<int> symbolic_conditional_energy(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_default);
-RcppExport SEXP _CRFutilRcppComponents_symbolic_conditional_energy(SEXP configSEXP, SEXP condition_element_numberSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP adj_nodesSEXP, SEXP num_params_defaultSEXP) {
+// alpha_vector
+arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_default);
+RcppExport SEXP _CRFutilRcppComponents_alpha_vector(SEXP configSEXP, SEXP condition_element_numberSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP adj_nodesSEXP, SEXP num_params_defaultSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -150,7 +150,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
     Rcpp::traits::input_parameter< List >::type adj_nodes(adj_nodesSEXP);
     Rcpp::traits::input_parameter< int >::type num_params_default(num_params_defaultSEXP);
-    rcpp_result_gen = Rcpp::wrap(symbolic_conditional_energy(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default));
+    rcpp_result_gen = Rcpp::wrap(alpha_vector(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -175,7 +175,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CRFutilRcppComponents_get_par_off2", (DL_FUNC) &_CRFutilRcppComponents_get_par_off2, 7},
     {"_CRFutilRcppComponents_phi_component", (DL_FUNC) &_CRFutilRcppComponents_phi_component, 6},
     {"_CRFutilRcppComponents_phi_component2", (DL_FUNC) &_CRFutilRcppComponents_phi_component2, 6},
-    {"_CRFutilRcppComponents_symbolic_conditional_energy", (DL_FUNC) &_CRFutilRcppComponents_symbolic_conditional_energy, 7},
+    {"_CRFutilRcppComponents_alpha_vector", (DL_FUNC) &_CRFutilRcppComponents_alpha_vector, 7},
     {"_CRFutilRcppComponents_testemptymat", (DL_FUNC) &_CRFutilRcppComponents_testemptymat, 1},
     {NULL, NULL, 0}
 };

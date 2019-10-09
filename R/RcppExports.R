@@ -37,8 +37,8 @@ phi_component2 <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_ma
     .Call(`_CRFutilRcppComponents_phi_component2`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in)
 }
 
-symbolic_conditional_energy <- function(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default = 0L) {
-    .Call(`_CRFutilRcppComponents_symbolic_conditional_energy`, config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default)
+alpha_vector <- function(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default = 0L) {
+    .Call(`_CRFutilRcppComponents_alpha_vector`, config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default)
 }
 
 testemptymat <- function(emptymat) {
