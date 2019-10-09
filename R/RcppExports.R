@@ -21,24 +21,20 @@ compute_model_matrix <- function(configs, edge_mat, node_par, edge_par, num_para
     .Call(`_CRFutilRcppComponents_compute_model_matrix`, configs, edge_mat, node_par, edge_par, num_params_default)
 }
 
-get_par_off <- function(config, i_in = NULL, j_in = NULL, node_par_in = NULL, edge_par_in = NULL, edge_mat_in = NULL, printQ = FALSE) {
+get_par_off <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ = FALSE) {
     .Call(`_CRFutilRcppComponents_get_par_off`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ)
 }
 
-get_par_off2 <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ = FALSE) {
-    .Call(`_CRFutilRcppComponents_get_par_off2`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ)
-}
-
-phi_component <- function(config, i_in = NULL, j_in = NULL, node_par_in = NULL, edge_par_in = NULL, edge_mat_in = NULL) {
+phi_component <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in) {
     .Call(`_CRFutilRcppComponents_phi_component`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in)
-}
-
-phi_component2 <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in) {
-    .Call(`_CRFutilRcppComponents_phi_component2`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in)
 }
 
 alpha_vector <- function(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default = 0L) {
     .Call(`_CRFutilRcppComponents_alpha_vector`, config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default)
+}
+
+delta_alpha <- function(samples, num_params_default = 0L) {
+    .Call(`_CRFutilRcppComponents_delta_alpha`, samples, num_params_default)
 }
 
 testemptymat <- function(emptymat) {

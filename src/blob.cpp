@@ -208,106 +208,6 @@ arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_
   
 }
 
-//===============================================
-// get.par.idx port Now an offset however  ******* R-Nullables may be causing PROBLEMS?
-// ******** REMOVE AT SOME POINT
-//===============================================
-// [[Rcpp::export]]
-int get_par_off(arma::Mat<int>                config, 
-                Rcpp::Nullable<int>           i_in        = R_NilValue, 
-                Rcpp::Nullable<int>           j_in        = R_NilValue, 
-                Rcpp::Nullable<IntegerMatrix> node_par_in = R_NilValue,
-                Rcpp::Nullable<List>          edge_par_in = R_NilValue,
-                Rcpp::Nullable<IntegerMatrix> edge_mat_in = R_NilValue,
-                bool                          printQ      = false) {
-  
-  int i, j;
-  List edge_par;
-  arma::Mat<int> edge_mat;
-  arma::Mat<int> node_par;
-  int par_off = -1;          // parameter offset NOT index
-  
-  if(i_in.isNotNull()) {
-    i = as<int>(i_in);
-    if(j_in.isNotNull()) {
-      
-      // An edge was input
-      j = as<int>(j_in);
-      
-      // Need edge_par
-      if(edge_par_in.isNotNull()) {
-        edge_par = edge_par_in;
-        // for(int i=0; i<edge_par.size(); ++i){
-        //   Rcout << as<arma::Mat<int>>(edge_par(i)) << endl;
-        // }
-      } else {
-        stop("Edge param queried but no edge par input.");
-      }
-      
-      // Need edge mat
-      if(edge_mat_in.isNotNull()) {
-        edge_mat = as<arma::Mat<int>>(edge_mat_in);
-        //Rcout << edge_mat << endl;
-      } else {
-        stop("Edge param queried but no edge mat input.");
-      }
-      
-      // Check and see if the edge indices are together in the edge matrix
-      // Note: actually get the edge offset, not index
-      arma::Mat<int> avec(1,2);
-      avec(0,0) = i;
-      avec(0,1) = j;
-      
-      // edge offset in the edge matrix:
-      arma::uvec edge_off = row_match(avec, edge_mat);
-      
-      if(edge_off.size() == 0) {
-        Rcout << "Input edge indices: i=" << i  << " j=" << j << endl;
-        stop("Input edge indices not found in edge mat");
-      }
-      if(edge_off.size() > 1) {
-        Rcout << "Input edge indices: i=" << i << " j=" << j << endl;
-        stop("Something is wierd. Mutiple instances of this edge found in edge mat.");
-      }
-      
-      // If all looks ok, compute parameter offset (not index!) associated with edge
-      arma::Mat<int> aepm;
-      aepm = as<arma::Mat<int>>(edge_par(edge_off(0)));
-      int left_off  = edge_mat(edge_off(0),0) - 1;                                    // offset NOT index, do -1
-      int right_off = edge_mat(edge_off(0),1) - 1;                                    // offset NOT index, do -1
-      
-      arma::Mat<int> tmp;                                                             // to hold product
-      tmp = ff_C(config(left_off)).t() * aepm * ff_C(config(right_off));
-      
-      par_off = tmp(0,0) - 1;                                                         // offset NOT index, do -1
-      
-    } else {
-      
-      //A node was input
-      if(node_par_in.isNotNull()) {
-        node_par = as<arma::Mat<int>>(node_par_in);
-        //Rcout << node_par << endl;
-      } else {
-        stop("Node param queried but no node par input.");
-      }
-      
-      // Need to get node row (offset) out of node par
-      // Note: assumes each node only has one parameter. One parameter can be shared
-      // between many nodes however.
-      
-      // If all looks ok, compute parameter offset (not index!) associated with node
-      int node_off = i-1;                                                  // Just for readability for when I forget how I did this...
-      par_off = dot( node_par.row(node_off), ff_C(config(node_off)) ) - 1; // -1 bec we want offsets NOT indices
-    }
-    
-  } else {
-    stop("No node i index entered!");
-  }
-  
-  // Note: If offset is -1 that means parameter is not associated with this node/edge and spin set
-  return par_off;
-}
-
 
 //===============================================
 // get.par.idx port Now an offset AND ALMOST NO 
@@ -321,7 +221,7 @@ int get_par_off(arma::Mat<int>                config,
 // in -1
 //===============================================
 // [[Rcpp::export]]
-int get_par_off2(arma::Mat<int>       config, 
+int get_par_off(arma::Mat<int>       config, 
                  int                  i_in,  
                  int                  j_in, 
                  arma::Mat<int>       node_par_in,
@@ -413,46 +313,18 @@ int get_par_off2(arma::Mat<int>       config,
 
 
 //===============================================
-// phi.component port  **** R nullables
-// ******* Remove this at some point
-//===============================================
-// [[Rcpp::export]]
-int phi_component(arma::Mat<int>                config,
-                  Rcpp::Nullable<int>           i_in        = R_NilValue, 
-                  Rcpp::Nullable<int>           j_in        = R_NilValue, 
-                  Rcpp::Nullable<IntegerMatrix> node_par_in = R_NilValue,
-                  Rcpp::Nullable<List>          edge_par_in = R_NilValue,
-                  Rcpp::Nullable<IntegerMatrix> edge_mat_in = R_NilValue) {
-  
-  int par_off = get_par_off(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
-  
-  int swtch;
-  if(par_off == -1) {
-    swtch = 1;
-  } else {
-    swtch = 0;
-  }
-  
-  int comp = 1 - swtch;
-  
-  return comp;
-  
-}
-
-
-//===============================================
 // phi.component port  **** NOW WITH ALMOST NO R nullables and NO DEFAULT ARGUEMENTS
 // See get_par_off2 for what "empty" arguements should be passed in as
 //===============================================
 // [[Rcpp::export]]
-int phi_component2(arma::Mat<int>       config,
+int phi_component(arma::Mat<int>       config,
                    int                  i_in, 
                    int                  j_in, 
                    arma::Mat<int>       node_par_in,
                    Rcpp::Nullable<List> edge_par_in,
                    arma::Mat<int>       edge_mat_in) {
   
-  int par_off = get_par_off2(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
+  int par_off = get_par_off(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
   
   int swtch;
   if(par_off == -1) {
@@ -518,7 +390,7 @@ arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number,
   param_num_vec.zeros();
   
   // Parameter (if any) associated with conditioned node
-  int l = get_par_off2(config, condition_element_number, -1, node_par, R_NilValue, emptym, false);
+  int l = get_par_off(config, condition_element_number, -1, node_par, R_NilValue, emptym, false);
   if(l >= 0) {
     param_num_vec(l) ++;
   }
@@ -535,7 +407,7 @@ arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number,
     edge_nods(1) = adj_nodes_loc(i);
     std::sort(edge_nods.begin(), edge_nods.end());
     
-    int k = get_par_off2(config, edge_nods(0), edge_nods(1), emptym, edge_par, edge_mat, false);
+    int k = get_par_off(config, edge_nods(0), edge_nods(1), emptym, edge_par, edge_mat, false);
     if(k >= 0) {
       param_num_vec(k) ++;
     }
@@ -543,4 +415,22 @@ arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number,
   }
 
   return param_num_vec;
+}
+
+
+//=====================================================
+// logistic_util.R function ports:
+//=====================================================
+//
+//
+//===============================================
+// Port of delta.alpha
+//===============================================
+//[[Rcpp::export]]
+arma::Mat<int> delta_alpha(arma::Mat<int> samples, int num_params_default=0) {
+
+  arma::Mat<int> Da_mat; //array(NA,c(nrow(samples)*crf$n.nodes, crf$n.par))
+  
+  return Da_mat;
+  
 }

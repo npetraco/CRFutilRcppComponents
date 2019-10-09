@@ -161,7 +161,7 @@ end_time <- Sys.time()
 end_time - start_time
 
 
-get_par_off2(
+get_par_off(
   config      = as.matrix(configs[jridx,]), 
   i_in        =  1, 
   j_in        = -1, 
