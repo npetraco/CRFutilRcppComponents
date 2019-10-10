@@ -458,10 +458,10 @@ arma::Mat<int> delta_alpha(arma::Mat<int> samples,
   arma::Mat<int> X_cfg(1, samples.n_cols,arma::fill::zeros);
   arma::Mat<int> Xc_cfg(1, samples.n_cols,arma::fill::zeros);
   
-  Rcout << Da_mat.n_rows << " " << Da_mat.n_cols << endl;
-  Rcout << X_cfg.size() << endl;
-  Rcout << Xc_cfg.size() << endl;
-  Rcout << samples.n_rows << " " << samples.n_cols << endl;
+  //Rcout << Da_mat.n_rows << " " << Da_mat.n_cols << endl;
+  //Rcout << X_cfg.size() << endl;
+  //Rcout << Xc_cfg.size() << endl;
+  //Rcout << samples.n_rows << " " << samples.n_cols << endl;
   
   int count = 0;
   for(int i=0; i<num_nodes; ++i) {
@@ -472,9 +472,9 @@ arma::Mat<int> delta_alpha(arma::Mat<int> samples,
       X_cfg(0,i) = 1;
       Xc_cfg(0,i) = 2;
 
-      Da_mat.row(count) =  alpha_vector(X_cfg,  i, edge_mat, node_par, edge_par, adj_nodes, num_params_in)
-                         - alpha_vector(Xc_cfg, i, edge_mat, node_par, edge_par, adj_nodes, num_params_in);
-      Rcout << count << endl;
+      Da_mat.row(count) =  alpha_vector(X_cfg,  i+1, edge_mat, node_par, edge_par, adj_nodes, num_params_in)
+                         - alpha_vector(Xc_cfg, i+1, edge_mat, node_par, edge_par, adj_nodes, num_params_in);
+      //Rcout << count << endl;
       count++;
       
     }

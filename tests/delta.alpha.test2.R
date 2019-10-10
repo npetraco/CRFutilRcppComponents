@@ -1,10 +1,11 @@
+# Model Matrix and Delta-alpha for tesseract
 library(CRFutil)
 library(CRFutilRcppComponents)
 library(rbenchmark)
 library(microbenchmark)
 
 # Make up a random graph
-num.nodes <- 12
+num.nodes <- 16
 g <- erdos.renyi.game(num.nodes, 1, typ="gnp")
 dev.off()
 plot(g)
@@ -36,13 +37,14 @@ head(configs.and.counts)
 configs <- configs.and.counts[,1:ncol(samps)]
 configs <- as.matrix(sapply(configs, as.numeric))
 head(configs)
+dim(configs)
 
 plot(1:nrow(configs.and.counts),configs.and.counts[,ncol(configs.and.counts)],typ="h", ylab="config freqs",xlab="config #")
 
 # Here we remove the extra index put in by CRF using the C function
 theta.pars   <- fix_node_and_edge_par(node_par = rmod$node.par, edge_par = rmod$edge.par)
 
-#delta_alpha(as.matrix(samps), rmod$node.par, rmod$edge.par, num_params_in=0)
+start_timeC <- Sys.time()
 Da.matC <- delta_alpha(
   samples       = as.matrix(samps), 
   node_par      = theta.pars$node_par, 
@@ -50,10 +52,15 @@ Da.matC <- delta_alpha(
   edge_mat      = rmod$edges,
   adj_nodes     = rmod$adj.nodes, 
   num_params_in = 0)
+end_timeC <- Sys.time()
+end_timeC - start_timeC
 
+start_timeR <- Sys.time()
 Delta.alpha.info <- delta.alpha(crf = rmod, samples = samps, printQ = F)
-Delta.alpha <- Delta.alpha.info$Delta.alpha
+end_timeR <- Sys.time()
+end_timeR - start_timeR
 
+Delta.alpha <- Delta.alpha.info$Delta.alpha
 
 dim(Da.matC)
 dim(Delta.alpha)
@@ -62,9 +69,33 @@ dim(Delta.alpha)
 sum(Da.matC[,1] != Delta.alpha[,1])
 sapply(1:ncol(Da.matC), function(xx){sum(Da.matC[,xx] != Delta.alpha[,xx])})
 
-rmod$node.par
-class(samps)
 
-theta.pars$node_par
-testslicedetect(theta.pars$node_par)
-testslicedetect(rmod$node.par)
+# Model Matrix
+
+
+start_timeC <- Sys.time()
+MMC <- compute_model_matrix(
+  configs = configs,
+  edge_mat=rmod$edges, 
+  node_par=theta.pars$node_par,
+  edge_par=theta.pars$edge_par,
+  num_params_in = 0)
+end_timeC <- Sys.time()
+end_timeC - start_timeC
+
+start_timeR <- Sys.time()
+MMR <- compute.model.matrix(
+  configs = configs,
+  edges.mat=rmod$edges, 
+  node.par=rmod$node.par,
+  edge.par=rmod$edge.par,
+  ff=f0)
+end_timeR <- Sys.time()
+end_timeR - start_timeR
+
+dim(MMR)
+dim(MMC)
+
+# Check C vs R output
+sum(MMC[1,] != MMR[1,])
+sum(sapply(1:nrow(MMC), function(xx){sum(MMC[xx,] != MMR[xx,])}))
