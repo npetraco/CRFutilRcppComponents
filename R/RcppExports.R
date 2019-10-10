@@ -13,12 +13,16 @@ row_match <- function(x, table) {
     .Call(`_CRFutilRcppComponents_row_match`, x, table)
 }
 
-phi_features_C <- function(config, edge_mat, node_par, edge_par, num_params_default = 0L) {
-    .Call(`_CRFutilRcppComponents_phi_features_C`, config, edge_mat, node_par, edge_par, num_params_default)
+get_num_params <- function(node_par, edge_par) {
+    .Call(`_CRFutilRcppComponents_get_num_params`, node_par, edge_par)
 }
 
-compute_model_matrix <- function(configs, edge_mat, node_par, edge_par, num_params_default = 0L) {
-    .Call(`_CRFutilRcppComponents_compute_model_matrix`, configs, edge_mat, node_par, edge_par, num_params_default)
+phi_features_C <- function(config, edge_mat, node_par, edge_par, num_params_in = 0L) {
+    .Call(`_CRFutilRcppComponents_phi_features_C`, config, edge_mat, node_par, edge_par, num_params_in)
+}
+
+compute_model_matrix <- function(configs, edge_mat, node_par, edge_par, num_params_in = 0L) {
+    .Call(`_CRFutilRcppComponents_compute_model_matrix`, configs, edge_mat, node_par, edge_par, num_params_in)
 }
 
 get_par_off <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in, printQ = FALSE) {
@@ -29,15 +33,19 @@ phi_component <- function(config, i_in, j_in, node_par_in, edge_par_in, edge_mat
     .Call(`_CRFutilRcppComponents_phi_component`, config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in)
 }
 
-alpha_vector <- function(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default = 0L) {
-    .Call(`_CRFutilRcppComponents_alpha_vector`, config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default)
+alpha_vector <- function(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_in = 0L) {
+    .Call(`_CRFutilRcppComponents_alpha_vector`, config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_in)
 }
 
-delta_alpha <- function(samples, num_params_default = 0L) {
-    .Call(`_CRFutilRcppComponents_delta_alpha`, samples, num_params_default)
+delta_alpha <- function(samples, node_par, edge_par, edge_mat, adj_nodes, num_params_in = 0L) {
+    .Call(`_CRFutilRcppComponents_delta_alpha`, samples, node_par, edge_par, edge_mat, adj_nodes, num_params_in)
 }
 
 testemptymat <- function(emptymat) {
     invisible(.Call(`_CRFutilRcppComponents_testemptymat`, emptymat))
+}
+
+testslicedetect <- function(amat) {
+    invisible(.Call(`_CRFutilRcppComponents_testslicedetect`, amat))
 }
 

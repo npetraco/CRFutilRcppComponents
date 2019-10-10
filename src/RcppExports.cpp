@@ -41,9 +41,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_num_params
+int get_num_params(arma::Mat<int> node_par, List edge_par);
+RcppExport SEXP _CRFutilRcppComponents_get_num_params(SEXP node_parSEXP, SEXP edge_parSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par(node_parSEXP);
+    Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_num_params(node_par, edge_par));
+    return rcpp_result_gen;
+END_RCPP
+}
 // phi_features_C
-arma::Mat<int> phi_features_C(arma::Mat<int> config, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_default);
-RcppExport SEXP _CRFutilRcppComponents_phi_features_C(SEXP configSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP num_params_defaultSEXP) {
+arma::Mat<int> phi_features_C(arma::Mat<int> config, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_in);
+RcppExport SEXP _CRFutilRcppComponents_phi_features_C(SEXP configSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP num_params_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -51,14 +63,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::Mat<int> >::type edge_mat(edge_matSEXP);
     Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par(node_parSEXP);
     Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
-    Rcpp::traits::input_parameter< int >::type num_params_default(num_params_defaultSEXP);
-    rcpp_result_gen = Rcpp::wrap(phi_features_C(config, edge_mat, node_par, edge_par, num_params_default));
+    Rcpp::traits::input_parameter< int >::type num_params_in(num_params_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(phi_features_C(config, edge_mat, node_par, edge_par, num_params_in));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_model_matrix
-arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_default);
-RcppExport SEXP _CRFutilRcppComponents_compute_model_matrix(SEXP configsSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP num_params_defaultSEXP) {
+arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_in);
+RcppExport SEXP _CRFutilRcppComponents_compute_model_matrix(SEXP configsSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP num_params_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -66,8 +78,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::Mat<int> >::type edge_mat(edge_matSEXP);
     Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par(node_parSEXP);
     Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
-    Rcpp::traits::input_parameter< int >::type num_params_default(num_params_defaultSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_model_matrix(configs, edge_mat, node_par, edge_par, num_params_default));
+    Rcpp::traits::input_parameter< int >::type num_params_in(num_params_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_model_matrix(configs, edge_mat, node_par, edge_par, num_params_in));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -105,8 +117,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // alpha_vector
-arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_default);
-RcppExport SEXP _CRFutilRcppComponents_alpha_vector(SEXP configSEXP, SEXP condition_element_numberSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP adj_nodesSEXP, SEXP num_params_defaultSEXP) {
+arma::Mat<int> alpha_vector(arma::Mat<int> config, int condition_element_number, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, List adj_nodes, int num_params_in);
+RcppExport SEXP _CRFutilRcppComponents_alpha_vector(SEXP configSEXP, SEXP condition_element_numberSEXP, SEXP edge_matSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP adj_nodesSEXP, SEXP num_params_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -116,20 +128,24 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par(node_parSEXP);
     Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
     Rcpp::traits::input_parameter< List >::type adj_nodes(adj_nodesSEXP);
-    Rcpp::traits::input_parameter< int >::type num_params_default(num_params_defaultSEXP);
-    rcpp_result_gen = Rcpp::wrap(alpha_vector(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_default));
+    Rcpp::traits::input_parameter< int >::type num_params_in(num_params_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(alpha_vector(config, condition_element_number, edge_mat, node_par, edge_par, adj_nodes, num_params_in));
     return rcpp_result_gen;
 END_RCPP
 }
 // delta_alpha
-arma::Mat<int> delta_alpha(arma::Mat<int> samples, int num_params_default);
-RcppExport SEXP _CRFutilRcppComponents_delta_alpha(SEXP samplesSEXP, SEXP num_params_defaultSEXP) {
+arma::Mat<int> delta_alpha(arma::Mat<int> samples, arma::Mat<int> node_par, List edge_par, arma::Mat<int> edge_mat, List adj_nodes, int num_params_in);
+RcppExport SEXP _CRFutilRcppComponents_delta_alpha(SEXP samplesSEXP, SEXP node_parSEXP, SEXP edge_parSEXP, SEXP edge_matSEXP, SEXP adj_nodesSEXP, SEXP num_params_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::Mat<int> >::type samples(samplesSEXP);
-    Rcpp::traits::input_parameter< int >::type num_params_default(num_params_defaultSEXP);
-    rcpp_result_gen = Rcpp::wrap(delta_alpha(samples, num_params_default));
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type node_par(node_parSEXP);
+    Rcpp::traits::input_parameter< List >::type edge_par(edge_parSEXP);
+    Rcpp::traits::input_parameter< arma::Mat<int> >::type edge_mat(edge_matSEXP);
+    Rcpp::traits::input_parameter< List >::type adj_nodes(adj_nodesSEXP);
+    Rcpp::traits::input_parameter< int >::type num_params_in(num_params_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(delta_alpha(samples, node_par, edge_par, edge_mat, adj_nodes, num_params_in));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -143,18 +159,30 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// testslicedetect
+void testslicedetect(arma::Cube<int> amat);
+RcppExport SEXP _CRFutilRcppComponents_testslicedetect(SEXP amatSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::Cube<int> >::type amat(amatSEXP);
+    testslicedetect(amat);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CRFutilRcppComponents_ff_C", (DL_FUNC) &_CRFutilRcppComponents_ff_C, 1},
     {"_CRFutilRcppComponents_fix_node_and_edge_par", (DL_FUNC) &_CRFutilRcppComponents_fix_node_and_edge_par, 2},
     {"_CRFutilRcppComponents_row_match", (DL_FUNC) &_CRFutilRcppComponents_row_match, 2},
+    {"_CRFutilRcppComponents_get_num_params", (DL_FUNC) &_CRFutilRcppComponents_get_num_params, 2},
     {"_CRFutilRcppComponents_phi_features_C", (DL_FUNC) &_CRFutilRcppComponents_phi_features_C, 5},
     {"_CRFutilRcppComponents_compute_model_matrix", (DL_FUNC) &_CRFutilRcppComponents_compute_model_matrix, 5},
     {"_CRFutilRcppComponents_get_par_off", (DL_FUNC) &_CRFutilRcppComponents_get_par_off, 7},
     {"_CRFutilRcppComponents_phi_component", (DL_FUNC) &_CRFutilRcppComponents_phi_component, 6},
     {"_CRFutilRcppComponents_alpha_vector", (DL_FUNC) &_CRFutilRcppComponents_alpha_vector, 7},
-    {"_CRFutilRcppComponents_delta_alpha", (DL_FUNC) &_CRFutilRcppComponents_delta_alpha, 2},
+    {"_CRFutilRcppComponents_delta_alpha", (DL_FUNC) &_CRFutilRcppComponents_delta_alpha, 6},
     {"_CRFutilRcppComponents_testemptymat", (DL_FUNC) &_CRFutilRcppComponents_testemptymat, 1},
+    {"_CRFutilRcppComponents_testslicedetect", (DL_FUNC) &_CRFutilRcppComponents_testslicedetect, 1},
     {NULL, NULL, 0}
 };
 
