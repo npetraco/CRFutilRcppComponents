@@ -14,7 +14,8 @@ using namespace std;
 // x: 1 or 2 ONLY
 //============================================================
 // [[Rcpp::export]]
-arma::Mat<int> ff_C(int x){
+arma::Mat<int> ff_C(int x) {
+  
   arma::Mat<int> aspinor(2,1);
 
   aspinor[0] = (x == 1);
@@ -31,7 +32,7 @@ arma::Mat<int> ff_C(int x){
 // Ultimately intended for internal use only.
 //===================================================================================
 // [[Rcpp::export]]
-List fix_node_and_edge_par(arma::Cube<int> node_par, List edge_par){
+List fix_node_and_edge_par(arma::Cube<int> node_par, List edge_par) {
   
   arma::Mat<int> node_par_new(node_par.n_rows,2);
   arma::Mat<int> aedge_par_mat(2,2);
@@ -68,7 +69,7 @@ List fix_node_and_edge_par(arma::Cube<int> node_par, List edge_par){
 // don't want to pass in R functions anyway
 //===============================================
 // [[Rcpp::export]]
-arma::uvec row_match(arma::Mat<int> x, arma::Mat<int> table){
+arma::uvec row_match(arma::Mat<int> x, arma::Mat<int> table) {
   
   arma::uvec matching_row_idxs;
 
@@ -95,6 +96,7 @@ arma::uvec row_match(arma::Mat<int> x, arma::Mat<int> table){
 //===============================================
 //[[Rcpp::export]]
 int get_num_params(arma::Mat<int> node_par, List edge_par) {
+  
   int num_params;
   
   num_params = node_par.max();
@@ -121,16 +123,20 @@ int get_num_params(arma::Mat<int> node_par, List edge_par) {
 // phi.features port to C  ******* CLEAN THIS UP!!!!!!!
 //===============================================
 //[[Rcpp::export]]
-arma::Mat<int> phi_features_C(arma::Mat<int> config, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_in=0) {
-  
+arma::Mat<int> phi_features_C(arma::Mat<int> config, 
+                              arma::Mat<int> edge_mat, 
+                              arma::Mat<int> node_par, 
+                              List           edge_par, 
+                              int            num_params_in=0) 
+{
   int num_nodes = config.size();
   int num_edges = edge_mat.n_rows;
   
-  // The original R function determines this everytime it is called. This is stupid and will
-  // slow things down. To keep parity with the R function signature, by default the number of
-  // parameters will be calculated. However the user can also prespcify it and change the default
-  // value from 0 so the loop below isn't excecuted over an over when calling the function
-  // multiple times.
+  // The original R function determines the number of parameters everytime it is called. 
+  // This is stupid and will slow things down. However, to keep parity with the R function signature, 
+  // by default the number of parameters will be calculated. The user can also pre-specify the
+  // number of parameters so that the extra loop the calculation requires is not executed. 
+  // The default value of 0 for num_params_in indicates the number of parameters will be computed.
   int num_params;
   if(num_params_in == 0) {
     num_params = get_num_params(node_par, edge_par);
@@ -192,12 +198,16 @@ arma::Mat<int> phi_features_C(arma::Mat<int> config, arma::Mat<int> edge_mat, ar
 // compute.model.matrix port
 //===============================================
 // [[Rcpp::export]]
-arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_mat, arma::Mat<int> node_par, List edge_par, int num_params_in = 0) {
-  
+arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, 
+                                    arma::Mat<int> edge_mat, 
+                                    arma::Mat<int> node_par, 
+                                    List           edge_par, 
+                                    int            num_params_in = 0) 
+{
   int num_configs = configs.n_rows;
   int num_params;
   
-  // Check and see if number of parameters was input:
+  // Check and see if number of parameters was input. If not compute them:
   if(num_params_in == 0) {
     num_params = get_num_params(node_par, edge_par);
   } else {
@@ -228,13 +238,13 @@ arma::Mat<int> compute_model_matrix(arma::Mat<int> configs, arma::Mat<int> edge_
 //===============================================
 // [[Rcpp::export]]
 int get_par_off(arma::Mat<int>       config, 
-                 int                  i_in,  
-                 int                  j_in, 
-                 arma::Mat<int>       node_par_in,
-                 Rcpp::Nullable<List> edge_par_in,
-                 arma::Mat<int>       edge_mat_in,
-                 bool                 printQ = false) {
-  
+                int                  i_in,  
+                int                  j_in, 
+                arma::Mat<int>       node_par_in,
+                Rcpp::Nullable<List> edge_par_in,
+                arma::Mat<int>       edge_mat_in,
+                bool                 printQ = false) 
+{
   int i, j;
   List edge_par;
   arma::Mat<int> edge_mat;
@@ -323,13 +333,13 @@ int get_par_off(arma::Mat<int>       config,
 // See get_par_off2 for what "empty" arguements should be passed in as
 //===============================================
 // [[Rcpp::export]]
-int phi_component(arma::Mat<int>       config,
+int phi_component(arma::Mat<int>        config,
                    int                  i_in, 
                    int                  j_in, 
                    arma::Mat<int>       node_par_in,
                    Rcpp::Nullable<List> edge_par_in,
-                   arma::Mat<int>       edge_mat_in) {
-  
+                   arma::Mat<int>       edge_mat_in) 
+{
   int par_off = get_par_off(config, i_in, j_in, node_par_in, edge_par_in, edge_mat_in);
   
   int swtch;
@@ -366,14 +376,10 @@ arma::Mat<int> alpha_vector(arma::Mat<int> config,
                             arma::Mat<int> node_par, 
                             List           edge_par, 
                             List           adj_nodes, 
-                            int            num_params_in=0) {
-
-  // Same as for phi_features_C:
-  // The original R function determines this everytime it is called. This is stupid and will
-  // slow things down. To keep parity with the R function signature, by default the number of
-  // parameters will be calculated. However the user can also prespcify it and change the default
-  // value from 0 so the loop below isn't excecuted over an over when calling the function
-  // multiple times.
+                            int            num_params_in=0) 
+{
+  
+  // Check and see if number of parameters was input. If not compute them: 
   int num_params;
   if(num_params_in == 0) {
     num_params = get_num_params(node_par, edge_par);
@@ -435,14 +441,9 @@ arma::Mat<int> delta_alpha(arma::Mat<int> samples,
                            List           edge_par, 
                            arma::Mat<int> edge_mat,
                            List           adj_nodes,
-                           int            num_params_in=0) {
-  
-  // Same as for phi_features_C:
-  // The original R function determines this everytime it is called. This is stupid and will
-  // slow things down. To keep parity with the R function signature, by default the number of
-  // parameters will be calculated. However the user can also prespcify it and change the default
-  // value from 0 so the loop below isn't excecuted over an over when calling the function
-  // multiple times.
+                           int            num_params_in=0) 
+{
+  // Check and see if number of parameters was input. If not compute them:  
   int num_params;
   if(num_params_in == 0) {
     num_params = get_num_params(node_par, edge_par);
@@ -453,16 +454,11 @@ arma::Mat<int> delta_alpha(arma::Mat<int> samples,
   int num_nodes = samples.n_cols; // For readability
   
   // Initialize some memory to be used and re-used
-  // Da.mat <- array(NA,c(nrow(samples)*crf$n.nodes, crf$n.par))
   arma::Mat<int> Da_mat(samples.n_rows*num_nodes, num_params, arma::fill::zeros);
   arma::Mat<int> X_cfg(1, samples.n_cols,arma::fill::zeros);
   arma::Mat<int> Xc_cfg(1, samples.n_cols,arma::fill::zeros);
   
-  //Rcout << Da_mat.n_rows << " " << Da_mat.n_cols << endl;
-  //Rcout << X_cfg.size() << endl;
-  //Rcout << Xc_cfg.size() << endl;
-  //Rcout << samples.n_rows << " " << samples.n_cols << endl;
-  
+  // Compute Delta-alpha matrix:
   int count = 0;
   for(int i=0; i<num_nodes; ++i) {
     for(int n=0; n<samples.n_rows; ++n) {
@@ -474,7 +470,7 @@ arma::Mat<int> delta_alpha(arma::Mat<int> samples,
 
       Da_mat.row(count) =  alpha_vector(X_cfg,  i+1, edge_mat, node_par, edge_par, adj_nodes, num_params_in)
                          - alpha_vector(Xc_cfg, i+1, edge_mat, node_par, edge_par, adj_nodes, num_params_in);
-      //Rcout << count << endl;
+
       count++;
       
     }

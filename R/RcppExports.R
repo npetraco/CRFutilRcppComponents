@@ -49,3 +49,19 @@ testslicedetect <- function(amat) {
     invisible(.Call(`_CRFutilRcppComponents_testslicedetect`, amat))
 }
 
+testslicedetect2 <- function(amat) {
+    invisible(.Call(`_CRFutilRcppComponents_testslicedetect2`, amat))
+}
+
+testslicedetect3 <- function(amat) {
+    .Call(`_CRFutilRcppComponents_testslicedetect3`, amat)
+}
+
+testslicedetect4 <- function(amat) {
+    invisible(.Call(`_CRFutilRcppComponents_testslicedetect4`, amat))
+}
+
+testslicedetect5 <- function(amat) {
+    invisible(.Call(`_CRFutilRcppComponents_testslicedetect5`, amat))
+}
+

@@ -169,6 +169,47 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// testslicedetect2
+void testslicedetect2(SEXP amat);
+RcppExport SEXP _CRFutilRcppComponents_testslicedetect2(SEXP amatSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type amat(amatSEXP);
+    testslicedetect2(amat);
+    return R_NilValue;
+END_RCPP
+}
+// testslicedetect3
+NumericMatrix testslicedetect3(SEXP amat);
+RcppExport SEXP _CRFutilRcppComponents_testslicedetect3(SEXP amatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type amat(amatSEXP);
+    rcpp_result_gen = Rcpp::wrap(testslicedetect3(amat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// testslicedetect4
+void testslicedetect4(SEXP amat);
+RcppExport SEXP _CRFutilRcppComponents_testslicedetect4(SEXP amatSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type amat(amatSEXP);
+    testslicedetect4(amat);
+    return R_NilValue;
+END_RCPP
+}
+// testslicedetect5
+void testslicedetect5(NumericVector amat);
+RcppExport SEXP _CRFutilRcppComponents_testslicedetect5(SEXP amatSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type amat(amatSEXP);
+    testslicedetect5(amat);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CRFutilRcppComponents_ff_C", (DL_FUNC) &_CRFutilRcppComponents_ff_C, 1},
@@ -183,6 +224,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CRFutilRcppComponents_delta_alpha", (DL_FUNC) &_CRFutilRcppComponents_delta_alpha, 6},
     {"_CRFutilRcppComponents_testemptymat", (DL_FUNC) &_CRFutilRcppComponents_testemptymat, 1},
     {"_CRFutilRcppComponents_testslicedetect", (DL_FUNC) &_CRFutilRcppComponents_testslicedetect, 1},
+    {"_CRFutilRcppComponents_testslicedetect2", (DL_FUNC) &_CRFutilRcppComponents_testslicedetect2, 1},
+    {"_CRFutilRcppComponents_testslicedetect3", (DL_FUNC) &_CRFutilRcppComponents_testslicedetect3, 1},
+    {"_CRFutilRcppComponents_testslicedetect4", (DL_FUNC) &_CRFutilRcppComponents_testslicedetect4, 1},
+    {"_CRFutilRcppComponents_testslicedetect5", (DL_FUNC) &_CRFutilRcppComponents_testslicedetect5, 1},
     {NULL, NULL, 0}
 };
 
